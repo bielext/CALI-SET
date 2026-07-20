@@ -18,7 +18,7 @@ const client = new Client({
 });
 
 // 🔥 CONFIG
-const CANAL_STAFF = '1498465789408317580';
+const CANAL_STAFF = '1527387879506972712';
 
 // 🔥 SALVAR DADOS TEMPORÁRIOS
 const dadosUsuarios = new Map();
@@ -26,15 +26,16 @@ const solicitacoesAtivas = new Set();
 
 // 🔥 CARGOS
 const CARGOS_PERMITIDOS = [
-  { label: 'Morador', value: '1498173549939130515' },
-  { label: 'Membro', value: '1498173549939130516' },
-  { label: 'Traficante', value: '1498506801405100186' },
-  { label: 'Gerente de Farm', value: '1499162387746656286' },
-  { label: 'Gerente de Ação', value: '1499161759083266088' },
-  { label: 'Gerencia', value: '1499160667373179022' },
-  { label: 'Gerente Geral', value: '1498173549939130517' },
-  { label: '02', value: '1498173549939130518' },
-  { label: 'OWNER', value: '1498173549939130519' }
+  { label: 'Aguardando Indicação', value: '1522679986115313704' },
+  { label: 'Indicado', value: '1513683130329075904' },
+  { label: 'Membro', value: '1383265179814596628' },
+  { label: 'Gerente de Venda', value: '1521362845889990666' },
+  { label: 'Gerente de Farm', value: '1522374130442436738' },
+  { label: 'Gerente de Ação', value: '1519848020949073940' },
+  { label: 'Gerente Geral', value: '1515034002933682348' },
+  { label: '03', value: '1516498757695574157' },
+  { label: '02', value: '1516498493940699177' },
+  { label: '01', value: '1192191893174485062' }
 ];
 
 client.once('ready', () => {
@@ -53,9 +54,9 @@ client.on('interactionCreate', async (interaction) => {
         const embed = new EmbedBuilder()
           .setTitle('📋 Solicitar Set')
           .setDescription('Clique no botão abaixo para iniciar seu cadastro.')
-          .setColor('#f1c40f')
-          .setImage('https://media.discordapp.net/attachments/1498441095560823034/1498453509304225893/banner.png')
-          .setFooter({ text: 'Sistema de Registro • BGK' })
+          .setColor('#00BFFF')
+          .setImage('https://media.discordapp.net/attachments/1498166599495192727/1528121557120057404/file_0000000096fc820eb5d31fb36a7ab5fb.png?ex=6a5e771a&is=6a5d259a&hm=d134d2644a6673a1b4d88585889f2e5411a2376e9f75cb188315ef44a1d93c3d&=&format=webp&quality=lossless&width=1768&height=707')
+          .setFooter({ text: 'Sistema de Registro • CALI' })
           .setTimestamp();
 
         const row = new ActionRowBuilder().addComponents(
@@ -132,7 +133,7 @@ client.on('interactionCreate', async (interaction) => {
 
       const embed = new EmbedBuilder()
         .setTitle('📥 Nova Solicitação')
-        .setColor('#f1c40f')
+        .setColor('#00BFFF')
         .setThumbnail(interaction.user.displayAvatarURL())
         .addFields(
           { name: '👤 Usuário', value: `${interaction.user}`, inline: false },
