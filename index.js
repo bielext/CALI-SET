@@ -28,7 +28,10 @@ const solicitacoesAtivas = new Set();
 const CARGOS_PERMITIDOS = [
   { label: 'Aguardando Indicação', value: '1522679986115313704' },
   { label: 'Indicado', value: '1513683130329075904' },
+  { label: 'Morador', value: '1528644783722205194' },
   { label: 'Membro', value: '1383265179814596628' },
+  { label: 'Soldado', value: '1528644941247680634' },
+  { label: 'Gerencia', value: '1528645075326730293' },
   { label: 'Gerente de Venda', value: '1521362845889990666' },
   { label: 'Gerente de Farm', value: '1522374130442436738' },
   { label: 'Gerente de Ação', value: '1519848020949073940' },
