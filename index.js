@@ -1,3 +1,4 @@
+
 const {
   Client,
   GatewayIntentBits,
@@ -131,8 +132,11 @@ client.on('interactionCreate', async (interaction) => {
       const passaporte = interaction.fields.getTextInputValue('passaporte');
       const telefone = interaction.fields.getTextInputValue('telefone') || 'Não informado';
 
-      // 🔥 SALVA O NOME
-      dadosUsuarios.set(interaction.user.id, { nome });
+      // 🔥 SALVA NOME E PASSAPORTE
+dadosUsuarios.set(interaction.user.id, {
+  nome,
+  passaporte
+});
 
       const embed = new EmbedBuilder()
         .setTitle('📥 Nova Solicitação')
@@ -204,41 +208,43 @@ client.on('interactionCreate', async (interaction) => {
 
       await membro.roles.add(cargoId);
 
-      // 🔥 PEGA NOME DO FORM
-      const dados = dadosUsuarios.get(userId);
-      const nomeForm = dados?.nome || membro.user.username;
+// 🔥 PEGA DADOS DO FORM
+const dados = dadosUsuarios.get(userId);
 
-      // 🔥 TAG DO CARGO
-      const match = cargo.name.match(/\[(.*?)\]/);
-      let novoNick = nomeForm;
+const nomeForm = dados?.nome || membro.user.username;
+const passaporte = dados?.passaporte || "0000";
 
-      if (match) {
-        const tag = `[${match[1]}]`;
-        novoNick = `${tag} ${nomeForm}`;
-      }
+// 🔥 PEGA A SIGLA DO NOME DO CARGO
+const match = cargo.name.match(/\[\s*(.*?)\s*\]/);
 
-      // 🔥 APLICA NICKNAME
-      await membro.setNickname(novoNick).catch(() => {});
+const sigla = match ? match[1] : "";
 
-      solicitacoesAtivas.delete(userId);
-      dadosUsuarios.delete(userId);
+// 🔥 NOVO NICK
+const novoNick = `[ ${sigla} ] ${nomeForm} | ${passaporte}`;
 
-      try {
-        await membro.send(`✅ Você foi aprovado como **${cargo.name}**!`);
-      } catch {}
+// 🔥 ALTERA O NICK
+await membro.setNickname(novoNick).catch(console.error);
 
-      await interaction.editReply({
-        content: '✅ Cargo + nome aplicado!',
-        components: []
-      });
+solicitacoesAtivas.delete(userId);
+dadosUsuarios.delete(userId);
 
-      await interaction.message.edit({ components: [] });
-    }
+try {
+  await membro.send(`✅ Você foi aprovado como **${cargo.name}**!`);
+} catch {}
 
-    // ========================
-    // 🔥 REPROVAR
-    // ========================
-    if (interaction.isButton() && interaction.customId.startsWith('reprovar_')) {
+await interaction.editReply({
+  content: "✅ Cargo + nome aplicado!",
+  components: []
+});
+
+await interaction.message.edit({ components: [] });
+
+} // <-- FECHA O IF DO SELECTCARGO
+
+// ========================
+// 🔥 REPROVAR
+// ========================
+if (interaction.isButton() && interaction.customId.startsWith('reprovar_')) {
 
       const userId = interaction.customId.split('_')[1];
 
