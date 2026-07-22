@@ -1,4 +1,3 @@
-
 const {
   Client,
   GatewayIntentBits,
@@ -22,7 +21,6 @@ const client = new Client({
 const CANAL_STAFF = '1527387879506972712';
 
 // 🔥 SALVAR DADOS TEMPORÁRIOS
-const dadosUsuarios = new Map();
 const solicitacoesAtivas = new Set();
 
 // 🔥 CARGOS
@@ -132,12 +130,6 @@ client.on('interactionCreate', async (interaction) => {
       const passaporte = interaction.fields.getTextInputValue('passaporte');
       const telefone = interaction.fields.getTextInputValue('telefone') || 'Não informado';
 
-      // 🔥 SALVA NOME E PASSAPORTE
-dadosUsuarios.set(interaction.user.id, {
-  nome,
-  passaporte
-});
-
       const embed = new EmbedBuilder()
         .setTitle('📥 Nova Solicitação')
         .setColor('#00BFFF')
@@ -150,17 +142,19 @@ dadosUsuarios.set(interaction.user.id, {
         )
         .setTimestamp();
 
-      const botoes = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId(`aprovar_${interaction.user.id}`)
-          .setLabel('Aprovar')
-          .setStyle(ButtonStyle.Success),
+      const nome64 = Buffer.from(nome, "utf8").toString("base64url");
 
-        new ButtonBuilder()
-          .setCustomId(`reprovar_${interaction.user.id}`)
-          .setLabel('Reprovar')
-          .setStyle(ButtonStyle.Danger)
-      );
+const botoes = new ActionRowBuilder().addComponents(
+  new ButtonBuilder()
+    .setCustomId(`aprovar|${interaction.user.id}|${nome64}|${Buffer.from(passaporte, "utf8").toString("base64url")}`)
+    .setLabel("Aprovar")
+    .setStyle(ButtonStyle.Success),
+
+  new ButtonBuilder()
+    .setCustomId(`reprovar_${interaction.user.id}`)
+    .setLabel("Reprovar")
+    .setStyle(ButtonStyle.Danger)
+);
 
       const canal = await client.channels.fetch(CANAL_STAFF);
 
@@ -177,14 +171,14 @@ dadosUsuarios.set(interaction.user.id, {
     // ========================
     // 🔥 APROVAR → MENU
     // ========================
-    if (interaction.isButton() && interaction.customId.startsWith('aprovar_')) {
+    if (interaction.isButton() && interaction.customId.startsWith('aprovar|')) {
 
-      const userId = interaction.customId.split('_')[1];
+      const [, userId, nome64, passaporte64] = interaction.customId.split("|");
 
-      const menu = new StringSelectMenuBuilder()
-        .setCustomId(`selectcargo_${userId}`)
-        .setPlaceholder('Escolha o cargo')
-        .addOptions(CARGOS_PERMITIDOS);
+const menu = new StringSelectMenuBuilder()
+    .setCustomId(`selectcargo|${userId}|${nome64}|${passaporte64}`)
+    .setPlaceholder("Escolha o cargo")
+    .addOptions(CARGOS_PERMITIDOS);
 
       return interaction.reply({
         content: '🎯 Selecione o cargo:',
@@ -196,23 +190,23 @@ dadosUsuarios.set(interaction.user.id, {
     // ========================
     // 🔥 ESCOLHER CARGO + NOME CERTO
     // ========================
-    if (interaction.isStringSelectMenu() && interaction.customId.startsWith('selectcargo_')) {
+    if (interaction.isStringSelectMenu() && interaction.customId.startsWith('selectcargo|')) {
 
       await interaction.deferUpdate();
 
-      const userId = interaction.customId.split('_')[1];
-      const cargoId = interaction.values[0];
+      const partes = interaction.customId.split("|");
+
+const userId = partes[1];
+const nomeForm = Buffer.from(partes[2], "base64url").toString("utf8");
+const passaporte64 = partes[3];
+const passaporte = Buffer.from(passaporte64, "base64url").toString("utf8");
+
+const cargoId = interaction.values[0];
 
       const membro = await interaction.guild.members.fetch(userId);
       const cargo = interaction.guild.roles.cache.get(cargoId);
 
       await membro.roles.add(cargoId);
-
-// 🔥 PEGA DADOS DO FORM
-const dados = dadosUsuarios.get(userId);
-
-const nomeForm = dados?.nome || membro.user.username;
-const passaporte = dados?.passaporte || "0000";
 
 // 🔥 PEGA A SIGLA DO NOME DO CARGO
 const match = cargo.name.match(/\[\s*(.*?)\s*\]/);
@@ -226,7 +220,6 @@ const novoNick = `[ ${sigla} ] ${nomeForm} | ${passaporte}`;
 await membro.setNickname(novoNick).catch(console.error);
 
 solicitacoesAtivas.delete(userId);
-dadosUsuarios.delete(userId);
 
 try {
   await membro.send(`✅ Você foi aprovado como **${cargo.name}**!`);
@@ -276,7 +269,6 @@ if (interaction.isButton() && interaction.customId.startsWith('reprovar_')) {
       const motivo = interaction.fields.getTextInputValue('motivo');
 
       solicitacoesAtivas.delete(userId);
-      dadosUsuarios.delete(userId);
 
       const membro = await interaction.guild.members.fetch(userId);
 
